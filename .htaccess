@@ -1,0 +1,4 @@
+RewriteEngine on
+RewriteRule ^([a-zA-Z]+)$ mediatekdocuments.php?table=$1
+RewriteRule ^([a-zA-Z]+)/({.*})$ mediatekdocuments.php?table=$1&champs=$2
+RewriteRule ^([a-zA-Z]+)/([a-zA-Z0-9]+)/({.*})$ mediatekdocuments.php?table=$1&id=$2&champs=$3
