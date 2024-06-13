@@ -1,4 +1,5 @@
 RewriteEngine on
-RewriteRule ^([a-zA-Z]+)$ mediatekdocuments.php?table=$1
-RewriteRule ^([a-zA-Z]+)/({.*})$ mediatekdocuments.php?table=$1&champs=$2
-RewriteRule ^([a-zA-Z]+)/([a-zA-Z0-9]+)/({.*})$ mediatekdocuments.php?table=$1&id=$2&champs=$3
+RewriteRule ^$  mediatekdocuments.php?error=404
+RewriteRule ^([a-zA-Z0-9_]+)$ mediatekdocuments.php?table=$1
+RewriteRule ^([a-zA-Z0-9_]+)/({.*})$ mediatekdocuments.php?table=$1&champs=$2 [B,L]
+RewriteRule ^([a-zA-Z0-9_]+)/([a-zA-Z0-9]+)/({.*})$ mediatekdocuments.php?table=$1&id=$2&champs=$3 [B,L]

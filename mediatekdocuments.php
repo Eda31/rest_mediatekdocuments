@@ -4,7 +4,7 @@ include_once("Controle.php");
 $controle = new Controle();
 
 // Contrôle de l'authentification
-if(!isset($_SERVER['PHP_AUTH_USER']) || (isset($_SERVER['PHP_AUTH_USER']) && 
+if(!isset($_SERVER['PHP_AUTH_USER']) || (isset($_SERVER['PHP_AUTH_USER']) &&
         !(($_SERVER['PHP_AUTH_USER']=='admin' && ($_SERVER['PHP_AUTH_PW']=='adminpwd'))))){
     $controle->unauthorized();
     

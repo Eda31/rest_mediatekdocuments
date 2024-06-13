@@ -30,14 +30,14 @@ class ConnexionPDO {
      * @return résultat requête (booléen)
      */
     public function execute($requete, $param=null){
-        try{	
+        try{
             $requetePrepare = $this->conn->prepare($requete);
             if($param != null){
-                foreach($param as $key => &$value){				
-                    $requetePrepare->bindParam(":$key", $value);				
+                foreach($param as $key => &$value){
+                    $requetePrepare->bindParam(":$key", $value);
                 }
-            }	
-            return $requetePrepare->execute();			
+            }
+            return $requetePrepare->execute();
         }catch(Exception $e){
             return null;
         }
@@ -65,7 +65,7 @@ class ConnexionPDO {
             } 
         }catch(Exception $e){
             return null;
-        }		
+        }
     }
-	
+
 }
