@@ -49,7 +49,11 @@ class MyAccessBDD extends AccessBDD
                 // select portant sur une table contenant juste id et libelle
                 return $this->selectTableSimple($table);
             case "commande" :
-                return $this->selectCommandesLivre($champs);
+                return $this->selectCommandes($champs);
+            case "abonnement" :
+                return $this->selectAbonnements($champs);
+            case "abonnements" :
+                return $this->selectAllAbonnements();
             default:
                 // cas général
                 return $this->selectTuplesOneTable($table, $champs);
@@ -70,6 +74,8 @@ class MyAccessBDD extends AccessBDD
                 return $this->insertOneLivre($champs);
             case "commande" :
                 return $this->insertOneCommande($champs);
+            case "abonnement" :
+                return $this->insertOneAbonnement($champs);
             default:
                 // cas général
                 return $this->insertOneTupleOneTable($table, $champs);
@@ -91,6 +97,8 @@ class MyAccessBDD extends AccessBDD
                 return $this->updateOneLivre($id, $champs);
             case "commande" :
                 return $this->updateOneCommande($id, $champs);
+            case "abonnement" :
+                return $this->updateOneAbonnement($id, $champs);
             default:
                 // cas général
                 return $this->updateOneTupleOneTable($table, $id, $champs);
@@ -111,6 +119,8 @@ class MyAccessBDD extends AccessBDD
                 return $this->deleteOneLivre($champs);
             case "commande" :
                 return $this->deleteOneCommande($champs);
+            case "abonnement" :
+                return $this->deleteOneAbonnement($champs);
             default:
                 // cas général
                 return $this->deleteTuplesOneTable($table, $champs);
@@ -365,11 +375,11 @@ class MyAccessBDD extends AccessBDD
     }
     
     /*
-     * récupération de toute les commandes d'un livre
-     * @param string $id id du livre
+     * récupération de toute les commandes d'un livre ou dvd
+     * @param string $id id du livre ou dvd
      * @return lignes de la requete
      */
-    public function selectCommandesLivre(?array $champs) : ?array
+    public function selectCommandes(?array $champs) : ?array
     {
         if (empty($champs)) {
             return null;
@@ -467,4 +477,114 @@ class MyAccessBDD extends AccessBDD
        $result = $this->conn->queryBDD($req, $param);
        return $result[0]["COUNT(*)"] > 0;
    }
+   
+   /*
+     * récupération de toute les commandes abonnement
+     * @param string $id id de la revue
+     * @return lignes de la requete
+     */
+    public function selectAbonnements(?array $champs) : ?array
+    {
+        if (empty($champs)) {
+            return null;
+        }
+        if (!array_key_exists('id', $champs)) {
+            return null;
+        }
+        $champNecessaire['id'] = $champs['id'];
+      
+        $requete = "SELECT c.id, c.dateCommande, c.montant, a.dateFinAbonnement, a.idRevue ";
+        $requete .= "FROM `commande` AS c ";
+        $requete .= "JOIN abonnement AS a ON c.id = a.id ";
+        $requete .= "WHERE a.idRevue = :id ";
+        $requete .= "ORDER BY c.dateCommande DESC";
+        return $this->conn->queryBDD($requete, $champNecessaire);
+    }
+    
+    /**
+     * demande d'ajout (insert) d'un abonnement
+     * @param array|null $champs
+     * @return int|null
+     */
+    private function insertOneAbonnement(?array $champs) : ?int
+    {
+        if (empty($champs)) {
+            return 'null';
+        }
+        $paramsCom = [
+            'id' => $champs['Id'],
+            'dateCommande' => $champs['DateCommande'],
+            'montant' => $champs['Montant']
+        ];
+        
+        $paramsAbo = [
+            'id' => $champs['Id'],
+            'dateFinAbonnement' => $champs['DateFinAbonnement'],
+            'idRevue' => $champs['IdRevue']
+        ];
+        $insertCom = $this->insertOneTupleOneTable("commande", $paramsCom);
+        $insertCommandeDoc = $this->insertOneTupleOneTable("abonnement", $paramsAbo);
+        return $insertCommandeDoc && $insertCom;
+    }
+    
+    /**
+     * Modifie un abonnement
+     * @param string $id id de l'abonnement
+     * @param array $champs
+     * @return bool
+     * @throws Exception
+     */
+    public function updateOneAbonnement($id, $champs)
+    {
+        if ($this->conn != null && $champs != null) {
+            $id = $champs['Id'];
+            $paramsAbo = [
+                'id' => $champs['Id'],
+                'dateFinAbonnement' => $champs['DateFinAbonnement'],
+                'idRevue' => $champs['IdRevue']
+            ];
+            $paramsCom = [
+                'id' => $champs['Id'],
+                'dateCommande' => $champs['DateCommande'],
+                'montant' => $champs['Montant']
+            ];
+            $updateCom = $this->updateOneTupleOneTable("commande", $id, $paramsCom);
+            $updateAbo = $this->updateOneTupleOneTable("abonnement", $id, $paramsAbo);
+            return $updateAbo && $updateCom;
+        }
+        return false;
+    }
+
+    /**
+     * supprime un abonnement
+     * @param type $champs
+     * @return bool
+     */
+    public function deleteOneAbonnement($champs)
+    {
+        $param = ['id' => $champs['Id']];
+        // Supprimer dans la table commandedocument
+        $deleteAbo = $this->deleteTuplesOneTable("abonnement", $param);
+        // Supprimer dans la table commande
+        $deleteCom = $this->deleteTuplesOneTable("commande", $param);
+        return $deleteAbo && $deleteCom;
+    }
+    
+    /**
+    * Récupère tous les abonnements
+    * @return array|null Liste des abonnements ou null si erreur
+    */
+   public function selectAllAbonnements(): ?array
+    {
+        $requete = "
+            SELECT a.id, a.dateFinAbonnement, a.idRevue, d.titre AS titreRevue
+            FROM abonnement a
+            JOIN revue r ON a.idRevue = r.id
+            JOIN document d ON r.id = d.id
+            WHERE DATEDIFF(a.dateFinAbonnement, CURDATE()) <= 30
+            ORDER BY a.dateFinAbonnement ASC;
+        ";
+        return $this->conn->queryBDD($requete);
+    }
+
 }
