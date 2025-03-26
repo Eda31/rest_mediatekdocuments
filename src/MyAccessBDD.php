@@ -54,6 +54,8 @@ class MyAccessBDD extends AccessBDD
                 return $this->selectAbonnements($champs);
             case "abonnements" :
                 return $this->selectAllAbonnements();
+            case "utilisateur" :
+                return $this->selectUtilisateur($champs);
             default:
                 // cas général
                 return $this->selectTuplesOneTable($table, $champs);
@@ -586,5 +588,26 @@ class MyAccessBDD extends AccessBDD
         ";
         return $this->conn->queryBDD($requete);
     }
-
+    
+    /**
+    * Récupère un utilisateur par son login
+    * @param array|null $champs Contient le login
+    * @return array|null Retourne l'utilisateur s'il existe, sinon null
+    */
+   public function selectUtilisateur(?array $champs) : ?array
+   {
+       if (empty($champs)) {
+            return null;
+        }
+        if (!array_key_exists('login', $champs)) {
+            return null;
+        }
+       $champNecessaire['login'] = $champs['login'];
+       $requete = "SELECT u.id, u.nom, u.prenom, u.login, u.motDePasse, s.id AS idService, s.libelle AS service 
+                   FROM utilisateur u 
+                   JOIN service s ON u.idService = s.id 
+                   WHERE u.login = :login";
+       return $this->conn->queryBDD($requete, $champNecessaire);
+   }
+   
 }
