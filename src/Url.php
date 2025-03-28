@@ -2,14 +2,12 @@
 require '../vendor/autoload.php';
 use Dotenv\Dotenv;
 
-
 /**
  * Singleton car la récupération des données ne peut se faire qu'une fois
  * Permet de gérer le contenu de l'URL qui sollicite l'API
  */
-class Url {
-    
-    
+class Url
+{
     /**
      * instance de la classe actuelle
      * @var Url
@@ -40,7 +38,8 @@ class Url {
      * récupère les variables d'environnement
      * récupère les variables envoyées via l'url
      */
-    private function __construct() {
+    private function __construct()
+    {
         // variables d'environnement
         $this->dotenv = Dotenv::createImmutable(__DIR__);
         $this->dotenv->load();
@@ -52,8 +51,9 @@ class Url {
      * méthode statique de création de l'instance unique
      * @return Url
      */
-    public static function getInstance() : Url{
-        if(self::$instance === null){
+    public static function getInstance() : Url
+    {
+        if (self::$instance === null) {
             self::$instance = new Url();
         }
         return self::$instance;
@@ -63,10 +63,11 @@ class Url {
      * récupère la méthode HTTP utilisée pour le transfert
      * @return string
      */
-    public function recupMethodeHTTP() : string{
+    public function recupMethodeHTTP() : string
+    {
         return $_SERVER['REQUEST_METHOD'] ?? 'GET';
-    }  
-  
+    }
+    
     /**
      * retour d'une variable avec les caractères spéciaux convertis
      * et au format array si format "json" reçu
@@ -75,25 +76,27 @@ class Url {
      * @param string $format
      * @return string|array|null
      */
-    public function recupVariable(string $nom, string $format="string") : string|array|null{
+    public function recupVariable(string $nom, string $format="string") : string|array|null
+    {
         $variable = $this->data[$nom] ?? '';
-        switch ($format){
-            case "json" : 
+        switch ($format) {
+            case "json" :
                 $variable = $variable ? json_decode($variable, true) : null;
                 break;
         }
         return $variable;
-    }    
- 
+    }
+    
     /**
      * vérifie l'authentification suivant la demande
-     * possibilité d'ajouter des 'case' et de nouvelles fonctions 
+     * possibilité d'ajouter des 'case' et de nouvelles fonctions
      * si besoin d'un autre type d'authentification
      * @return bool
      */
-    public function authentification(): bool{
+    public function authentification(): bool
+    {
         $authentification = htmlspecialchars($_ENV['AUTHENTIFICATION'] ?? '');
-        switch ($authentification){
+        switch ($authentification) {
             case '' : return true ;
             case 'basic' : return self::basicAuthentification() ;
             default : return true;
@@ -101,37 +104,39 @@ class Url {
     }
 
     /**
-     * compare le user/pwd reçu en 'basic auth' 
+     * compare le user/pwd reçu en 'basic auth'
      * avec le user/pwd dans les variables d'environnement
      * @return bool true si authentification réussie
      */
-    private function basicAuthentification() : bool{
+    private function basicAuthentification() : bool
+    {
         // récupère les variables d'environnement de l'authentification
         $expectedUser = htmlspecialchars($_ENV['AUTH_USER'] ?? '');
-        $expectedPw = htmlspecialchars($_ENV['AUTH_PW'] ?? '');  
+        $expectedPw = htmlspecialchars($_ENV['AUTH_PW'] ?? '');
         // récupère les variables envoyées en 'basic auth'
         $authUser = htmlspecialchars($_SERVER['PHP_AUTH_USER'] ?? '');
-        $authPw = htmlspecialchars($_SERVER['PHP_AUTH_PW'] ?? '');    
+        $authPw = htmlspecialchars($_SERVER['PHP_AUTH_PW'] ?? '');
         // Contrôle si les valeurs d'authentification sont identiques
         return ($authUser === $expectedUser && $authPw === $expectedPw) ;
-    }    
- 
+    }
+    
     /**
      * récupération de toutes les variables envoyées par l'URL
      * nettoyage et retour dans un tableau associatif
      * @return array
      */
-    private function recupAllData() : array{
+    private function recupAllData() : array
+    {
         $data = [];
-        if(!empty($_GET)){
+        if (!empty($_GET)) {
             $data = array_merge($data, $_GET);
         }
-        if(!empty($_POST)){
+        if (!empty($_POST)) {
             $data = array_merge($data, $_POST);
         }
         $input = file_get_contents('php://input');
         parse_str($input, $postData);
-        $data = array_merge($data, $postData);    
+        $data = array_merge($data, $postData);
         // htmlspeciachars appliqué à chaque valeur du tableau
         $data = array_map(function($value) {
             return htmlspecialchars($value, ENT_NOQUOTES);

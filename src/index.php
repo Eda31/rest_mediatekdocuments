@@ -15,10 +15,10 @@ $url = Url::getInstance();
 $controle = new Controle();
 
 // vérifie l'authentification
-if (!$url->authentification()){
+if (!$url->authentification()) {
     // l'authentification a échoué
     $controle->unauthorized();
-}else{
+} else {
     // récupère la méthode HTTP utilisée pour accéder à l'API
     $methodeHTTP = $url->recupMethodeHTTP();
     //récupère les données passées dans l'url (visibles ou cachées)

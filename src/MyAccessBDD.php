@@ -72,8 +72,8 @@ class MyAccessBDD extends AccessBDD
     protected function traitementInsert(string $table, ?array $champs) : ?int
     {
         switch ($table) {
-            case "livre" :
-                return $this->insertOneLivre($champs);
+            //case "livre" :
+                //return $this->insertOneLivre($champs);
             case "commande" :
                 return $this->insertOneCommande($champs);
             case "abonnement" :
@@ -95,8 +95,8 @@ class MyAccessBDD extends AccessBDD
     protected function traitementUpdate(string $table, ?string $id, ?array $champs) : ?int
     {
         switch ($table) {
-            case "livre" :
-                return $this->updateOneLivre($id, $champs);
+            //case "livre" :
+                //return $this->updateOneLivre($id, $champs);
             case "commande" :
                 return $this->updateOneCommande($id, $champs);
             case "abonnement" :
@@ -117,8 +117,8 @@ class MyAccessBDD extends AccessBDD
     protected function traitementDelete(string $table, ?array $champs) : ?int
     {
         switch ($table) {
-            case "livre" :
-                return $this->deleteOneLivre($champs);
+            //case "livre" :
+                //return $this->deleteOneLivre($champs);
             case "commande" :
                 return $this->deleteOneCommande($champs);
             case "abonnement" :
@@ -247,7 +247,8 @@ class MyAccessBDD extends AccessBDD
     private function selectAllLivres() : ?array
     {
         $requete = "Select l.id, l.ISBN, l.auteur, d.titre, d.image, l.collection, ";
-        $requete .= "d.idrayon, d.idpublic, d.idgenre, g.libelle as genre, p.libelle as lePublic, r.libelle as rayon ";
+        $requete .= "d.idrayon, d.idpublic, d.idgenre, g.libelle as genre, ";
+        $requete .= "p.libelle as lePublic, r.libelle as rayon ";
         $requete .= "from livre l join document d on l.id=d.id ";
         $requete .= "join genre g on g.id=d.idGenre ";
         $requete .= "join public p on p.id=d.idPublic ";
@@ -390,7 +391,8 @@ class MyAccessBDD extends AccessBDD
             return null;
         }
         $champNecessaire['id'] = $champs['id'];
-        $requete = "SELECT cd.id, cd.idLivreDvd, c.dateCommande, c.montant, cd.nbExemplaire, cd.idsuivi AS SuiviId, s.etape AS EtapeSuivi ";
+        $requete = "SELECT cd.id, cd.idLivreDvd, c.dateCommande, c.montant, ";
+        $requete .= "cd.nbExemplaire, cd.idsuivi AS SuiviId, s.etape AS EtapeSuivi ";
         $requete .= "FROM commande c JOIN commandedocument cd ON c.id = cd.id ";
         $requete .= "JOIN suivi s ON s.id = cd.idsuivi ";
         $requete .= "WHERE cd.idLivreDvd = :id ";
@@ -406,7 +408,7 @@ class MyAccessBDD extends AccessBDD
     private function insertOneCommande(?array $champs) : ?int
     {
         if (empty($champs)) {
-            return 'null';
+            return null;
         }
         $paramsCom = [
             'id' => $champs['Id'],
@@ -511,7 +513,7 @@ class MyAccessBDD extends AccessBDD
     private function insertOneAbonnement(?array $champs) : ?int
     {
         if (empty($champs)) {
-            return 'null';
+            return null;
         }
         $paramsCom = [
             'id' => $champs['Id'],

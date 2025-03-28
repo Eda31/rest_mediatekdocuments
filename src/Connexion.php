@@ -6,28 +6,27 @@
  * - pour les requêtes LMD : nbre d'enregistrements impactés
  * Dans tous les cs, 'null' est renvoyé si la requête échpie.
  */
-class Connexion {
-
+class Connexion
+{
     /**
-     * 
      * @var Connexion
      */
     private static $instance = null;
     /**
-     * 
      * @var \PDO
      */
     private $conn = null;
 
     /**
      * constructeur privé : connexion à la BDD
-     * @param string $login 
+     * @param string $login
      * @param string $pwd
      * @param string $bd
      * @param string $server
      * @param string $port
      */
-    private function __construct(string $login, string $pwd, string $bd, string $server, string $port){
+    private function __construct(string $login, string $pwd, string $bd, string $server, string $port)
+    {
         try {
             $this->conn = new \PDO("mysql:host=$server;dbname=$bd;port=$port", $login, $pwd);
             $this->conn->query('SET CHARACTER SET utf8');
@@ -45,8 +44,9 @@ class Connexion {
      * @param string $port
      * @return Connexion instance unique de la classe
      */
-    public static function getInstance(string $login, string $pwd, string $bd, string $server, string $port) : Connexion{
-        if(self::$instance === null){
+    public static function getInstance(string $login, string $pwd, string $bd, string $server, string $port) : Connexion
+    {
+        if (self::$instance === null) {
             self::$instance = new Connexion($login, $pwd, $bd, $server, $port);
         }
         return self::$instance;
@@ -58,16 +58,17 @@ class Connexion {
      * @param array|null $param
      * @return int|null nombre de lignes affectées ou null si erreur
      */
-    public function updateBDD(string $requete, ?array $param=null) : ?int{
-        try{
+    public function updateBDD(string $requete, ?array $param=null) : ?int
+    {
+        try {
             $result = $this->prepareRequete($requete, $param);
             $reponse = $result->execute();
-            if($reponse === true){
+            if ($reponse === true) {
                 return $result->rowCount();
-            }else{
+            } else {
                 return null;
             }
-        }catch(Exception $e){
+        } catch (Exception $e) {
             return null;
         }
     }
@@ -78,16 +79,17 @@ class Connexion {
      * @param array|null $param
      * @return array|null lignes récupérées ou null si erreur
      */
-    public function queryBDD(string $requete, ?array $param=null) : ?array{     
-        try{
+    public function queryBDD(string $requete, ?array $param=null) : ?array
+    {
+        try {
             $result = $this->prepareRequete($requete, $param);
             $reponse = $result->execute();
-            if($reponse === true){
+            if ($reponse === true) {
                 return $result->fetchAll(PDO::FETCH_ASSOC);
-            }else{
+            } else {
                 return null;
-            } 
-        }catch(Exception $e){
+            }
+        } catch (Exception $e) {
             return null;
         }
     }
@@ -98,16 +100,17 @@ class Connexion {
      * @param array|null $param
      * @return \PDOStatement requête préparée
      */
-    private function prepareRequete(string $requete, ?array $param=null) : \PDOStatement{
-        try{
+    private function prepareRequete(string $requete, ?array $param=null) : \PDOStatement
+    {
+        try {
             $requetePrepare = $this->conn->prepare($requete);
-            if($param !== null && is_array($param)){
-                foreach($param as $key => &$value){
+            if ($param !== null && is_array($param)) {
+                foreach ($param as $key => &$value) {
                     $requetePrepare->bindParam(":$key", $value);
                 }
             }
             return $requetePrepare;
-        }catch(Exception $e){
+        } catch (Exception $e) {
             throw $e;
         }
     }
